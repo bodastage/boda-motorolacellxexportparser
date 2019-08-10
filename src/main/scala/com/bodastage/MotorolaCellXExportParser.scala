@@ -22,7 +22,7 @@ object MotorolaCellXExportParser {
       import builder._
       OParser.sequence(
         programName("boda-motorolacellxexportparser"),
-        head("boda-motorolacellxexportparser", "0.0.1"),
+        head("boda-motorolacellxexportparser", "0.0.2"),
         opt[File]('i', "in")
           .required()
           .valueName("<file>")
@@ -125,7 +125,18 @@ object MotorolaCellXExportParser {
 
       val fList = directory.listFiles
       for(f:File <- fList){
-        this.parseFile(f.getAbsolutePath)
+        try {
+          if( Files.isRegularFile(f.toPath)){
+            this.parseFile(f.getAbsolutePath)
+          }else{
+            println(s"${f.getAbsolutePath} is not a regular file. Skipping it.")
+          }
+
+        }catch {
+          case ex: Exception => {
+            println(s"Error processing ${f.getAbsolutePath}")
+          }
+        }
       }
     }
   }
