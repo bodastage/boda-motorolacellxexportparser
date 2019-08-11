@@ -22,7 +22,7 @@ object MotorolaCellXExportParser {
       import builder._
       OParser.sequence(
         programName("boda-motorolacellxexportparser"),
-        head("boda-motorolacellxexportparser", "0.0.2"),
+        head("boda-motorolacellxexportparser", "0.0.3"),
         opt[File]('i', "in")
           .required()
           .valueName("<file>")
@@ -151,11 +151,11 @@ object MotorolaCellXExportParser {
     //var parameters = ArrayBuffer[String]()
     var parameters : Array[String] = Array[String]()
 
-    if(outputFolder.length > 0) {
-      val csvFile: String = outputFolder + File.separator + fileBaseName + ".csv";
-      pw = new PrintWriter(new File(csvFile));
-    }
     var lineCount : Integer = 0;
+	
+	//Track the count of output csv files created
+	var outputCSVFileCount : Integer = 0;
+	
     var header = "";
     var headerArray : Array[String] =  Array[String]()
 
@@ -164,20 +164,34 @@ object MotorolaCellXExportParser {
       var rowArray : Array[String] = line.split("\t")
 
       breakable {
-        if(lineCount == 1){
+        if(rowArray(0) == "MSC Name"){
           headerArray = rowArray.map(v => v.replaceAll("\\s+", "_").toLowerCase())
-
+		
+		  //Reset parameter list 
+		  parameters  = Array[String]()
+		  
           for(i <- 0 to headerArray.length-1){
             if( !(parameters contains(headerArray(i))) ){
               parameters = parameters :+  headerArray(i)
             }
           }
 
+		  outputCSVFileCount += 1;
+		  //Close/create print writer 
+		  if(pw != null) pw.close()
+		  
           if(outputFolder.length == 0) {
             println(parameters.mkString(","));
           }else{
+			var fileCountTag : String = "";
+			if(outputCSVFileCount > 1 ) fileCountTag = s"-${outputCSVFileCount}";
+			
+			val csvFile: String = outputFolder + File.separator + fileBaseName + s"${fileCountTag}.csv";
+			pw = new PrintWriter(new File(csvFile));
+			  
             pw.write(parameters.mkString(",")+ "\n");
           }
+		  
 
           break;
         }
