@@ -79,7 +79,7 @@ object MotorolaCellXExportParser {
     try{
 
       if(showVersion){
-        println("0.1.0")
+        println("0.0.4")
         sys.exit(0);
       }
 
