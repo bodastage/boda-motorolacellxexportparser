@@ -2,10 +2,15 @@ package com.bodastage
 
 import java.io.{File, PrintWriter}
 import java.nio.file.{Files, Path, Paths}
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import scopt.OParser
 import scala.io.Source
 import util.control.Breaks._
 import scala.collection.mutable.ArrayBuffer
+
+
 
 case class Config(
                    in: File = new File("."),
@@ -22,9 +27,9 @@ object MotorolaCellXExportParser {
       import builder._
       OParser.sequence(
         programName("boda-motorolacellxexportparser"),
-        head("boda-motorolacellxexportparser", "0.0.3"),
+        head("boda-motorolacellxexportparser", "0.0.4"),
         opt[File]('i', "in")
-          .required()
+//          .required()
           .valueName("<file>")
           .action((x, c) => c.copy(in = x))
           .validate(f =>
@@ -141,11 +146,22 @@ object MotorolaCellXExportParser {
     }
   }
 
+  def getDateTime() : String = {
+    //Get current date and time
+	val dateFormat : DateFormat  = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	val date : Date = new Date();
+	val dateTime : String = dateFormat.format(date);
+	return dateTime;
+  }
+  
   /**
     * Parse a file
     * @param filename
     */
   def parseFile(fileName: String) : Unit = {
+
+	val dateTime : String = getDateTime();
+		
     val fileBaseName: String  = getFileBaseName(fileName);
     var pw : PrintWriter = null;
     //var parameters = ArrayBuffer[String]()
@@ -181,7 +197,7 @@ object MotorolaCellXExportParser {
 		  if(pw != null) pw.close()
 		  
           if(outputFolder.length == 0) {
-            println(parameters.mkString(","));
+            println("filename, datetime," + parameters.mkString(","));
           }else{
 			var fileCountTag : String = "";
 			if(outputCSVFileCount > 1 ) fileCountTag = s"-${outputCSVFileCount}";
@@ -189,7 +205,7 @@ object MotorolaCellXExportParser {
 			val csvFile: String = outputFolder + File.separator + fileBaseName + s"${fileCountTag}.csv";
 			pw = new PrintWriter(new File(csvFile));
 			  
-            pw.write(parameters.mkString(",")+ "\n");
+            pw.write("filename,datetime," + parameters.mkString(",")+ "\n");
           }
 		  
 
@@ -215,15 +231,14 @@ object MotorolaCellXExportParser {
           }else{
             csvRowValues(paramIndex) = value;
           }
-
         }
 
        val  csvRow = csvRowValues.map(v => toCSVFormat(v)).mkString(",")
 
         if(outputFolder.length == 0) {
-          println(csvRow);
+          println(s"${fileBaseName},${dateTime}," + csvRow);
         }else{
-          pw.write(csvRow + "\n");
+          pw.write(s"${fileBaseName},${dateTime}," + csvRow + "\n");
         }
 
       }
