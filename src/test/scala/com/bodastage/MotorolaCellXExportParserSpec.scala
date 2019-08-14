@@ -14,11 +14,11 @@ class MotorolaCellXExportParserSpec extends FunSuite {
         var parser = MotorolaCellXExportParser;
         var args : Array[String] = Array("-i", inputFile, "-o", outDir);
         parser.main(args);
+		val dateTime : String = parser.getDateTime();
 
-        val expectedCSV = "msc_name,omc_name,bss_name,site_name\nYYY,ABCDEFG,TT_00_4W,SiteName";
+        val expectedCSV = s"filename,datetime,msc_name,omc_name,bss_name,site_name\nRFPlanCell.out,${dateTime},YYY,ABCDEFG,TT_00_4W,SiteName";
 
         val sourceCSV = Source.fromFile(outDir + File.separator + "RFPlanCell.out.csv").getLines().mkString("\n");
-        println(sourceCSV)
         assert(expectedCSV == sourceCSV)
     }
 }
